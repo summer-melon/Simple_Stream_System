@@ -26,6 +26,7 @@
         <junit.version>4.13.1</junit.version>
         <kafka.version>2.8.1</kafka.version>
         <jackson.version>2.13.3</jackson.version>
+        <protobuf-java.version>3.11.0</protobuf-java.version>
     </properties>
 
     <dependencyManagement>
@@ -50,6 +51,11 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf-java.version}</version>
             </dependency>
 
         </dependencies>
