@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.toutiao.melon.rpc;
+
+option java_multiple_files = true;
+
+import "google/protobuf/empty.proto";
+
+message RpcEvent {
+  bytes event_bytes = 1;
+}
+
+service TransmitEvent {
+  rpc TransmitEvent (RpcEvent) returns (google.protobuf.Empty) {
+  }
+}
