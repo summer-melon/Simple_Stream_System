@@ -3,7 +3,7 @@ package com.toutiao.melon.api.job;
 import com.toutiao.melon.api.IOperator;
 import com.toutiao.melon.api.ISource;
 import com.toutiao.melon.api.utils.ApiUtil;
-import com.toutiao.melon.api.utils.EdgeConnectUtil;
+import com.toutiao.melon.api.utils.ConnectUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ public class Job {
         public Job.Builder addSource(String sourceId, Class<? extends ISource> sourceClass,
                                      int processNum, int threadNum) {
             ApiUtil.validateId(sourceId);
-            if (sourceId != null && !"".equals(sourceId)) {
+            if (!"".equals(sourceId)) {
                 nodes.remove(sourceId);
             }
             this.sourceId = sourceId;
@@ -73,7 +73,7 @@ public class Job {
             ApiUtil.validateId(targetId);
             ApiUtil.validateId(streamId);
             List<Edge> lists = this.edges.getOrDefault(sourceId, new ArrayList<>());
-            lists.add(new Edge(targetId, EdgeConnectUtil.connect(sourceId, streamId)));
+            lists.add(new Edge(targetId, ConnectUtil.connect(sourceId, streamId)));
             edges.put(sourceId, lists);
             return this;
         }

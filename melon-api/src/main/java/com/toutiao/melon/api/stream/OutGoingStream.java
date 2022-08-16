@@ -4,26 +4,21 @@ import com.google.protobuf.Descriptors;
 import com.toutiao.melon.api.message.DynamicSchema;
 import com.toutiao.melon.api.message.MessageDefinition;
 import com.toutiao.melon.api.utils.ApiUtil;
-
+import com.toutiao.melon.api.utils.ConnectUtil;
 import java.util.HashMap;
 import java.util.Map;
 
 public class OutGoingStream {
     private final String streamIdPrefix;
-    private final Map<String, DynamicSchema> OutGoingStreamSchemas = new HashMap<>();
+    private final Map<String, DynamicSchema> outGoingStreamSchemas = new HashMap<>();
 
-    public OutGoingStream(String topologyName, String taskName) {
-        this.streamIdPrefix = topologyName + "-" + taskName;
+    public OutGoingStream(String jobName, String taskName) {
+        this.streamIdPrefix = ConnectUtil.connect(jobName, taskName);
     }
 
     public OutGoingStream addSchema(String streamId, Field... fields) {
         ApiUtil.validateId(streamId);
-        MessageDefinition.Builder msgDefBuilder = MessageDefinition.newBuilder("TupleData");
-
-        // fields used by acker
-        msgDefBuilder.addField(FieldType.STRING, "_topologyName");
-        msgDefBuilder.addField(FieldType.INT, "_spoutTupleId");
-        msgDefBuilder.addField(FieldType.INT, "_traceId");
+        MessageDefinition.Builder msgDefBuilder = MessageDefinition.newBuilder("EventData");
 
         for (Field f : fields) {
             msgDefBuilder.addField(f.getFieldType(), f.getFieldName());
@@ -34,12 +29,13 @@ public class OutGoingStream {
                     .addMessageDefinition(msgDefBuilder.build())
                     .build();
         } catch (Descriptors.DescriptorValidationException ignored) {
+            ignored.printStackTrace();
         }
-        OutGoingStreamSchemas.put(streamIdPrefix + "-" + streamId, schema);
+        outGoingStreamSchemas.put(streamIdPrefix + "-" + streamId, schema);
         return this;
     }
 
     public Map<String, DynamicSchema> getOutGoingStreamSchemas() {
-        return OutGoingStreamSchemas;
+        return outGoingStreamSchemas;
     }
 }

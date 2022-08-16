@@ -15,8 +15,8 @@ public class Event {
         this.messageDescriptor = messageDescriptor;
     }
 
-    public boolean getBooleanByName(String fieldName) {
-        return (boolean) getFieldByName(fieldName);
+    public String getStringByName(String fieldName) {
+        return (String) getFieldByName(fieldName);
     }
 
     public int getIntByName(String fieldName) {
@@ -25,22 +25,6 @@ public class Event {
 
     public long getLongByName(String fieldName) {
         return (long) getFieldByName(fieldName);
-    }
-
-    public float getFloatByName(String fieldName) {
-        return (float) getFieldByName(fieldName);
-    }
-
-    public double getDoubleByName(String fieldName) {
-        return (double) getFieldByName(fieldName);
-    }
-
-    public byte[] getBytesByName(String fieldName) {
-        return (byte[]) getFieldByName(fieldName);
-    }
-
-    public String getStringByName(String fieldName) {
-        return (String) getFieldByName(fieldName);
     }
 
     private Object getFieldByName(String fieldName) {
