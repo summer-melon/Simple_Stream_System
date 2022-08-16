@@ -2,6 +2,7 @@ package com.toutiao.melon.api.job;
 
 import com.toutiao.melon.api.IOperator;
 import com.toutiao.melon.api.ISource;
+import com.toutiao.melon.api.utils.ApiUtil;
 import com.toutiao.melon.api.utils.EdgeConnectUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public class Job {
 
         public Job.Builder addSource(String sourceId, Class<? extends ISource> sourceClass,
                                      int processNum, int threadNum) {
+            ApiUtil.validateId(sourceId);
             if (sourceId != null && !"".equals(sourceId)) {
                 nodes.remove(sourceId);
             }
@@ -57,6 +59,7 @@ public class Job {
 
         public Job.Builder addOperator(String operatorId, Class<? extends IOperator> operatorClass,
                                        int processNum, int threadNum) {
+            ApiUtil.validateId(operatorId);
             if (sourceId != null && sourceId.equals(operatorId)) {
                 throw new IllegalArgumentException("operatorId shouldn't be same as sourceId");
             }
@@ -66,6 +69,9 @@ public class Job {
         }
 
         public Job.Builder addStream(String sourceId, String targetId, String streamId) {
+            ApiUtil.validateId(sourceId);
+            ApiUtil.validateId(targetId);
+            ApiUtil.validateId(streamId);
             List<Edge> lists = this.edges.getOrDefault(sourceId, new ArrayList<>());
             lists.add(new Edge(targetId, EdgeConnectUtil.connect(sourceId, streamId)));
             edges.put(sourceId, lists);

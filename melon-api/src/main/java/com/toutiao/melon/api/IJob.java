@@ -7,5 +7,5 @@ import com.toutiao.melon.api.job.Job;
  */
 public interface IJob {
 
-    Job getJob();
+    Job getJob() throws Exception;
 }

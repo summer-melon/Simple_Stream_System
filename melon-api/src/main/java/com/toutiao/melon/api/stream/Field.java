@@ -9,7 +9,7 @@ public class Field {
     private String fieldName;
 
     /** 数据字段类型 */
-    FieldType fieldType;
+    private FieldType fieldType;
 
     public Field() {
     }
