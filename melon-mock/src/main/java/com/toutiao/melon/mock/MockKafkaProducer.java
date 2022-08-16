@@ -3,7 +3,7 @@ package com.toutiao.melon.mock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toutiao.melon.mock.config.Config;
-import com.toutiao.melon.mock.entiry.Event;
+import com.toutiao.melon.mock.entity.Event;
 import com.toutiao.melon.mock.faker.StatelessBigFaker;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.producer.KafkaProducer;

@@ -1,7 +1,7 @@
 package com.toutiao.melon.mock.faker;
 
 import com.toutiao.melon.mock.data.MockData;
-import com.toutiao.melon.mock.entiry.Event;
+import com.toutiao.melon.mock.entity.Event;
 
 import java.util.List;
 

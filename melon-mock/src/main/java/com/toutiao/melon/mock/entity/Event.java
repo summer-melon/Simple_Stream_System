@@ -1,4 +1,4 @@
-package com.toutiao.melon.mock.entiry;
+package com.toutiao.melon.mock.entity;
 
 public class Event {
 
