@@ -15,6 +15,7 @@
         <module>melon-api</module>
         <module>melon-shared</module>
         <module>melon-mock</module>
+        <module>melon-example</module>
     </modules>
 
     <properties>
