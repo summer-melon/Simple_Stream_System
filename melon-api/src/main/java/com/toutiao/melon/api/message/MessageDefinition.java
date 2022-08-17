@@ -27,23 +27,23 @@ import java.util.Map;
  */
 public class MessageDefinition {
 
-    public static Builder newBuilder(String msgTypeName) {
-        return new Builder(msgTypeName);
-    }
+    private DescriptorProto messageType;
 
-    public String toString() {
-        return messageType.toString();
+    private MessageDefinition(DescriptorProto msgType) {
+        messageType = msgType;
     }
 
     public DescriptorProto getMessageType() {
         return messageType;
     }
 
-    private MessageDefinition(DescriptorProto msgType) {
-        messageType = msgType;
+    public String toString() {
+        return messageType.toString();
     }
 
-    private DescriptorProto messageType;
+    public static Builder newBuilder(String msgTypeName) {
+        return new Builder(msgTypeName);
+    }
 
     public static class Builder {
 
