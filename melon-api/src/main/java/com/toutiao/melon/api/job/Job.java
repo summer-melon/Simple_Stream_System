@@ -85,4 +85,20 @@ public class Job {
             return new Job(nodes, edges);
         }
     }
+
+    public Map<String, Node> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(Map<String, Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    public Map<String, List<Edge>> getEdges() {
+        return edges;
+    }
+
+    public void setEdges(Map<String, List<Edge>> edges) {
+        this.edges = edges;
+    }
 }
