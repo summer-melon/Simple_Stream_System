@@ -1,10 +1,8 @@
-
-
 package com.toutiao.melon.workerprocess.controller;
 
 import com.google.protobuf.Empty;
-import com.toutiao.melon.rpc.RpcTuple;
-import com.toutiao.melon.rpc.TransmitTupleGrpc.TransmitTupleImplBase;
+import com.toutiao.melon.rpc.RpcEvent;
+import com.toutiao.melon.rpc.TransmitEventGrpc.TransmitEventImplBase;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Slf4j
 @Singleton
-public class TransmitTupleController extends TransmitTupleImplBase {
+public class TransmitTupleController extends TransmitEventImplBase {
 
     private static final Empty EMPTY_MESSAGE = Empty.newBuilder().build();
 
@@ -25,9 +23,9 @@ public class TransmitTupleController extends TransmitTupleImplBase {
     }
 
     @Override
-    public void transmitTuple(RpcTuple request, StreamObserver<Empty> responseObserver) {
+    public void transmitEvent(RpcEvent request, StreamObserver<Empty> responseObserver) {
         try {
-            inboundQueue.put(request.getTupleBytes().toByteArray());
+            inboundQueue.put(request.getEventBytes().toByteArray());
         } catch (InterruptedException e) {
             log.error("Failed to receive tuple: " + e.toString());
         }

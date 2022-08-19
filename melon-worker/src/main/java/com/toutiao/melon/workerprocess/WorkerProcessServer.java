@@ -1,10 +1,7 @@
-
-
 package com.toutiao.melon.workerprocess;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.protobuf.Descriptors;
-import com.toutiao.melon.api.IOperator;
 import com.toutiao.melon.api.IOutStream;
 import com.toutiao.melon.api.message.DynamicSchema;
 import com.toutiao.melon.api.message.MessageDefinition;
@@ -153,7 +150,7 @@ public class WorkerProcessServer {
         return DynamicSchema.parseFrom(wrapper.getBytes());
     }
 
-    private Map<String, DynamicSchema> registerOutboundSchemas(Class<? extends IOperator> opClass,
+    private Map<String, DynamicSchema> registerOutboundSchemas(Class<? extends IOutStream> opClass,
                                                                DynamicSchema ackerSchema) throws Throwable {
         IOutStream operator = opClass.newInstance();
         OutGoingStream declarer = new OutGoingStream(topologyName, taskName);

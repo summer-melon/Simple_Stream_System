@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.worker;
 import com.toutiao.melon.rpc.ProvideJarGrpc;
 import com.toutiao.melon.rpc.ProvideJarGrpc.ProvideJarStub;
@@ -194,7 +192,7 @@ public class WorkerServer {
     }
 
     private String getJarPath(String topologyName) throws InterruptedException {
-        while (!jarService.jarFileExists(topologyName)) {
+        while (!jarService.isJarFileExists(topologyName)) {
             OutputStream out;
             try {
                 out = jarService.getOutputStream(topologyName);
@@ -211,7 +209,7 @@ public class WorkerServer {
             };
 
             ProvideJarRequest request = ProvideJarRequest.newBuilder()
-                    .setTopologyName(topologyName)
+                    .setJobName(topologyName)
                     .build();
 
             CountDownLatch receiveCompleted = new CountDownLatch(1);

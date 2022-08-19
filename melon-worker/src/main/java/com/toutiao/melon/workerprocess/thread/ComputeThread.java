@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.workerprocess.thread;
 
 import com.google.protobuf.Descriptors;

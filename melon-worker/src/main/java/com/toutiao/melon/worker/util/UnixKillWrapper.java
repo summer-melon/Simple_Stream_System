@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.worker.util;
 
 import com.sun.jna.Library;

@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.workerprocess.metrics;
 
 import com.toutiao.melon.shared.util.SharedUtil;
@@ -46,7 +44,7 @@ public class MetricsServer {
             server.start();
 
             int port = server.getAddress().getPort();
-            String ip = SharedUtil.getIp();
+            String ip = SharedUtil.getHost();
             zkConn.create("/exporter/" + ip + ":" + port, null, CreateMode.EPHEMERAL);
         } catch (Throwable t) {
             log.error("Failed to start prometheus server: " + t.toString());

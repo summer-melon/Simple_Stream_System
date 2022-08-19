@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.workerprocess.acker;
 
 import com.toutiao.melon.workerprocess.thread.ComputedOutput;

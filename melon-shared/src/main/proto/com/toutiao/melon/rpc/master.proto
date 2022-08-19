@@ -6,9 +6,9 @@ option java_multiple_files = true;
 
 message ManageJobRequestMetadata {
   enum RequestType {
-    START_Job = 0;
-    STOP_Job = 1;
-    QUERY_RUNNING_Job = 2;
+    START_JOB = 0;
+    STOP_JOB = 1;
+    QUERY_RUNNING_JOB = 2;
   }
 
   RequestType request_type = 1;

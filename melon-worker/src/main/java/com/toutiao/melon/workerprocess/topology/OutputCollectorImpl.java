@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.workerprocess.topology;
 
 import com.google.protobuf.Descriptors.Descriptor;
