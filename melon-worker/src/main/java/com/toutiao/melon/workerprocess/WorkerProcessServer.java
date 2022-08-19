@@ -12,11 +12,10 @@ import com.toutiao.melon.shared.util.SharedUtil;
 import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
 import com.toutiao.melon.workerprocess.acker.Acker;
 import com.toutiao.melon.workerprocess.controller.TransmitTupleController;
-import com.toutiao.melon.workerprocess.metrics.MetricsServer;
 import com.toutiao.melon.workerprocess.thread.ComputedOutput;
 import com.toutiao.melon.workerprocess.thread.ComputeThread;
 import com.toutiao.melon.workerprocess.thread.TransmitTupleClientThread;
-import com.toutiao.melon.workerprocess.topology.OperatorLoader;
+import com.toutiao.melon.workerprocess.job.OperatorLoader;
 import io.grpc.*;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -47,8 +46,6 @@ public class WorkerProcessServer {
     @Inject
     private ZooKeeperConnection zkConn;
 
-    @Inject
-    private MetricsServer metricsServer;
 
     @Inject
     PrometheusMeterRegistry prometheusRegistry;
@@ -69,7 +66,6 @@ public class WorkerProcessServer {
 
     public void start(String jarPath, String taskFullName) throws Throwable {
         decodeTaskFullName(taskFullName);
-        metricsServer.asyncStart(topologyName, taskName + ":" + processIndex);
         boolean isAcker = "~acker".equals(taskName);
 
         Class<? extends IOutStream> opClass;

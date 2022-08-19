@@ -1,4 +1,4 @@
-package com.toutiao.melon.workerprocess.topology;
+package com.toutiao.melon.workerprocess.job;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.DynamicMessage;
