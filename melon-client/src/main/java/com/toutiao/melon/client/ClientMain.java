@@ -1,16 +1,13 @@
 package com.toutiao.melon.client;
 
-import com.toutiao.melon.rpc.ManageJobRequest;
 import com.toutiao.melon.rpc.ManageJobRequestMetadata.RequestType;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
