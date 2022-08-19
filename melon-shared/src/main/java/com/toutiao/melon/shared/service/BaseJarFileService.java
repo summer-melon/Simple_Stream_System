@@ -1,5 +1,8 @@
 package com.toutiao.melon.shared.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,7 +11,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +78,7 @@ public class BaseJarFileService {
     }
 
     public Path getJarFilePath(String fileBaseName) {
-        return dataPath.resolve(fileBaseName + ".jar");
+        return dataPath.resolve(fileBaseName + SUFFIX);
     }
 
     public URL getJarFileUrl(String fileBaseName) throws MalformedURLException {
