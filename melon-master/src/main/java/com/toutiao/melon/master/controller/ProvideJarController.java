@@ -6,16 +6,17 @@ import com.toutiao.melon.rpc.ProvideJarGrpc.ProvideJarImplBase;
 import com.toutiao.melon.rpc.ProvideJarRequest;
 import com.toutiao.melon.rpc.ProvideJarResponse;
 import io.grpc.stub.StreamObserver;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 
-@Slf4j
 @Singleton
 public class ProvideJarController extends ProvideJarImplBase {
+    private static final Logger log = LoggerFactory.getLogger(ProvideJarController.class);
 
     @Inject
     private JarFileService jarService;

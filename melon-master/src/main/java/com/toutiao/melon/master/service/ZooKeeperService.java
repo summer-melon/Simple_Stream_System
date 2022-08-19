@@ -2,13 +2,13 @@ package com.toutiao.melon.master.service;
 
 import com.toutiao.melon.master.job.ComputationGraph;
 import com.toutiao.melon.master.job.TaskDefinition;
-import lombok.Data;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Transaction;
 import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
 import com.toutiao.melon.shared.util.SharedUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,11 +19,11 @@ import java.util.function.Function;
 
 import static org.apache.zookeeper.ZooDefs.Ids.OPEN_ACL_UNSAFE;
 
-@Slf4j
 @Singleton
 public class ZooKeeperService {
 
     private final ZooKeeperConnection zkConn;
+    private static final Logger log = LoggerFactory.getLogger(ZooKeeperService.class);
 
     @Inject
     public ZooKeeperService(ZooKeeperConnection zkConn) {
@@ -65,11 +65,34 @@ public class ZooKeeperService {
         return zkConn.exists("/master/topology/" + topologyName);
     }
 
-    @Data
     private static class LoadInfo {
         private String workerId;
         private int threads;
         private List<String> newAssignments = new ArrayList<>();
+
+        public String getWorkerId() {
+            return workerId;
+        }
+
+        public void setWorkerId(String workerId) {
+            this.workerId = workerId;
+        }
+
+        public int getThreads() {
+            return threads;
+        }
+
+        public void setThreads(int threads) {
+            this.threads = threads;
+        }
+
+        public List<String> getNewAssignments() {
+            return newAssignments;
+        }
+
+        public void setNewAssignments(List<String> newAssignments) {
+            this.newAssignments = newAssignments;
+        }
 
         public LoadInfo(String workerId, int threads) {
             this.workerId = workerId;
@@ -77,8 +100,7 @@ public class ZooKeeperService {
         }
     }
 
-    @SneakyThrows
-    public synchronized void startTopology(String topologyName, ComputationGraph cGraph) {
+    public synchronized void startTopology(String topologyName, ComputationGraph cGraph) throws InterruptedException, KeeperException {
         List<String> availableWorkers = zkConn.getChildren("/worker/available");
         if (availableWorkers.isEmpty()) {
             throw new RuntimeException("No workers available");
@@ -174,7 +196,12 @@ public class ZooKeeperService {
             }
         }
         txn.create("/master/topology/" + topologyName, "run".getBytes(), OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        txn.commit();
+        try{
+            txn.commit();
+        }catch (Exception e){
+            log.warn("The exception occurs, but skip now.");
+        }
+
     }
 
     public void stopTopology(String topologyName) {

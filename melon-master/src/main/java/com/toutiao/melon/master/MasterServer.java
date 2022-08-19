@@ -6,16 +6,17 @@ import com.toutiao.melon.master.controller.ManageJobController;
 import com.toutiao.melon.shared.GuiceModule;
 import com.toutiao.melon.master.controller.ProvideJarController;
 import io.grpc.*;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
 public class MasterServer {
 
     private Server server;
     private int port;
+    private static final Logger log = LoggerFactory.getLogger(MasterServer.class);
 
     public MasterServer(int port) {
         this.port = port;

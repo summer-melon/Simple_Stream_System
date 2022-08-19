@@ -9,7 +9,6 @@ import com.toutiao.melon.api.job.Job;
 import com.toutiao.melon.api.job.JobException;
 import com.toutiao.melon.api.job.Node;
 import com.toutiao.melon.api.stream.OutGoingStream;
-import lombok.AllArgsConstructor;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -44,10 +43,14 @@ public class JobLoader {
         }
     }
 
-    @AllArgsConstructor
     private static class DfsState<T> {
         private final T key;
         private final int edgeIndex;
+
+        public DfsState(T key, int edgeIndex) {
+            this.key = key;
+            this.edgeIndex = edgeIndex;
+        }
 
         public DfsState<T> nextEdge() {
             return new DfsState<>(key, edgeIndex + 1);

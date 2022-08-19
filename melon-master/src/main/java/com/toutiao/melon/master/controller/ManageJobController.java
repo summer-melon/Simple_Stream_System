@@ -10,7 +10,8 @@ import com.toutiao.melon.rpc.ManageJobRequestMetadata;
 import com.toutiao.melon.rpc.ManageJobRequestMetadata.RequestType;
 import com.toutiao.melon.rpc.ManageJobResponse;
 import io.grpc.stub.StreamObserver;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,9 +20,9 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
 
-@Slf4j
 @Singleton
 public class ManageJobController extends ManageJobImplBase {
+    private static final Logger log = LoggerFactory.getLogger(ManageJobController.class);
 
     @Inject
     private JarFileService jarService;

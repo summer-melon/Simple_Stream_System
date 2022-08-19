@@ -74,7 +74,7 @@ public class BaseJarFileService {
     }
 
     public Path getJarFilePath(String fileBaseName) {
-        return dataPath.resolve(fileBaseName + ".jar");
+        return dataPath.resolve(fileBaseName + SUFFIX);
     }
 
     public URL getJarFileUrl(String fileBaseName) throws MalformedURLException {
