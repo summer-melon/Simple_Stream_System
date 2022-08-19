@@ -13,7 +13,7 @@ import com.toutiao.melon.api.message.DynamicSchema;
 import com.toutiao.melon.api.stream.Collector;
 import com.toutiao.melon.api.stream.Event;
 import com.toutiao.melon.workerprocess.acker.*;
-import com.toutiao.melon.workerprocess.topology.OutputCollectorImpl;
+import com.toutiao.melon.workerprocess.job.OutputCollectorImpl;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;

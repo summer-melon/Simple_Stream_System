@@ -1,4 +1,4 @@
-package com.toutiao.melon.workerprocess.topology;
+package com.toutiao.melon.workerprocess.job;
 
 
 import com.toutiao.melon.api.IOutStream;
