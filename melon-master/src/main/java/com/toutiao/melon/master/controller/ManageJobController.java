@@ -103,14 +103,14 @@ public class ManageJobController extends ManageJobImplBase {
             }
 
             private void validateTopologyName() {
-                if (!RequestType.QUERY_RUNNING_Job.equals(requestType)
+                if (!RequestType.QUERY_RUNNING_JOB.equals(requestType)
                         && !jobName.matches("[a-zA-Z0-9]+")) {
                     message = "Only alphanumeric characters allowed for topologyName";
                 }
             }
 
             private OutputStream getJarFileOutputStream() {
-                if (requestType == RequestType.START_Job) {
+                if (requestType == RequestType.START_JOB) {
                     try {
                         return jarService.getOutputStream(jobName);
                     } catch (IOException e) {
