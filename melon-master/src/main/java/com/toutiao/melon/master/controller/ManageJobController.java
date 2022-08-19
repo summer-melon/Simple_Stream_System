@@ -142,7 +142,7 @@ public class ManageJobController extends ManageJobImplBase {
             private void processRequest() {
                 synchronized (ManageJobController.class) {
                     switch (requestType) {
-                        case START_Job:
+                        case START_JOB:
                             if (jobName.length() > Byte.MAX_VALUE) {
                                 message = "Length of topology name shouldn't be more than 127";
                             }
@@ -163,7 +163,7 @@ public class ManageJobController extends ManageJobImplBase {
 
                             message = "Success";
                             break;
-                        case STOP_Job:
+                        case STOP_JOB:
                             try {
                                 zkService.stopTopology(jobName);
                                 jarService.deleteJarFile(jobName);
@@ -174,7 +174,7 @@ public class ManageJobController extends ManageJobImplBase {
 
                             message = "Success";
                             break;
-                        case QUERY_RUNNING_Job:
+                        case QUERY_RUNNING_JOB:
                             message = formatRunningTopologies(zkService.getRunningTopologies());
                             break;
                     }
