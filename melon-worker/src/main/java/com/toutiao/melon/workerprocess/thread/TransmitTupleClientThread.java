@@ -1,12 +1,10 @@
-
-
 package com.toutiao.melon.workerprocess.thread;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Empty;
-import com.toutiao.melon.rpc.RpcTuple;
-import com.toutiao.melon.rpc.TransmitTupleGrpc;
-import com.toutiao.melon.rpc.TransmitTupleGrpc.TransmitTupleStub;
+import com.toutiao.melon.rpc.RpcEvent;
+import com.toutiao.melon.rpc.TransmitEventGrpc;
+import com.toutiao.melon.rpc.TransmitEventGrpc.TransmitEventStub;
 import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -30,13 +28,13 @@ public class TransmitTupleClientThread implements Runnable {
     private ZooKeeperConnection zkConn;
 
     private final BlockingQueue<ComputedOutput> outboundQueue = new LinkedBlockingQueue<>();
-    private final Map<String, Map<String, TransmitTupleStub>> clients = new HashMap<>();
+    private final Map<String, Map<String, TransmitEventStub>> clients = new HashMap<>();
     private final Map<String, Lock> streamServerLocks = new HashMap<>();
-    private final Map<String, Iterator<TransmitTupleStub>> iterators = new HashMap<>();
+    private final Map<String, Iterator<TransmitEventStub>> iterators = new HashMap<>();
 
     public void init(Set<String> outbounds) {
         for (String streamId : outbounds) {
-            Map<String, TransmitTupleStub> m = new HashMap<>();
+            Map<String, TransmitEventStub> m = new HashMap<>();
             clients.put(streamId, m);
             iterators.put(streamId, m.values().iterator());
             streamServerLocks.put(streamId, new ReentrantLock());
@@ -54,13 +52,13 @@ public class TransmitTupleClientThread implements Runnable {
         try {
             streamServerLocks.get(streamId).lock();
             List<String> currentServers = zkConn.getChildren("/stream/" + streamId);
-            Map<String, TransmitTupleStub> clientGroup = clients.get(streamId);
+            Map<String, TransmitEventStub> clientGroup = clients.get(streamId);
             currentServers.forEach(s -> {
                 if (!clientGroup.containsKey(s)) {
                     ManagedChannel channel = ManagedChannelBuilder.forTarget(s)
                             .usePlaintext()
                             .build();
-                    clientGroup.put(s, TransmitTupleGrpc.newStub(channel).withCompression("gzip"));
+                    clientGroup.put(s, TransmitEventGrpc.newStub(channel).withCompression("gzip"));
                 }
             });
             Iterator<String> iter = clientGroup.keySet().iterator();
@@ -90,18 +88,18 @@ public class TransmitTupleClientThread implements Runnable {
                 String streamId = output.getStreamId();
                 lock = streamServerLocks.get(streamId);
                 lock.lock();
-                Iterator<TransmitTupleStub> stubIter = iterators.get(streamId);
+                Iterator<TransmitEventStub> stubIter = iterators.get(streamId);
                 if (!stubIter.hasNext()) {
-                    Map<String, TransmitTupleStub> clientGroup = clients.get(streamId);
+                    Map<String, TransmitEventStub> clientGroup = clients.get(streamId);
                     if (clientGroup.isEmpty()) {
                         continue; // drop tuple if no stream target
                     }
                     stubIter = clientGroup.values().iterator();
                 }
-                TransmitTupleStub stub = stubIter.next();
+                TransmitEventStub stub = stubIter.next();
                 iterators.put(streamId, stubIter);
-                stub.transmitTuple(RpcTuple.newBuilder()
-                        .setTupleBytes(ByteString.copyFrom(output.getBytes()))
+                stub.transmitEvent(RpcEvent.newBuilder()
+                        .setEventBytes(ByteString.copyFrom(output.getBytes()))
                         .build(), new StreamObserver<Empty>() {
                     @Override
                     public void onNext(Empty value) {

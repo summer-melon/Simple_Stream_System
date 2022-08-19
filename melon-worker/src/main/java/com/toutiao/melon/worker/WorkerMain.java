@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.worker;
 
 import com.google.inject.Guice;

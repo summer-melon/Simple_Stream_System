@@ -1,4 +1,3 @@
-
 package com.toutiao.melon.workerprocess.thread;
 
 import lombok.AllArgsConstructor;

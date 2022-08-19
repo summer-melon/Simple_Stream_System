@@ -1,5 +1,3 @@
-
-
 package com.toutiao.melon.workerprocess.metrics;
 
 import io.micrometer.prometheus.PrometheusConfig;

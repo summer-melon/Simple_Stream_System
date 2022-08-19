@@ -3,9 +3,12 @@ package com.toutiao.melon.shared.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,7 @@ public class BaseJarFileService {
         if (Files.exists(dataPath)) {
             if (!Files.isDirectory(dataPath)) {
                 log.error("Fail to create data dir '" + dataDir + "' in '" + tmpDir
-                    + "', since there's a file with the same name exists.");
+                        + "', since there's a file with the same name exists.");
                 System.exit(-1);
             }
             log.info("Data dir '" + dataPath + "' used");
@@ -41,6 +44,7 @@ public class BaseJarFileService {
 
     /**
      * 判断Jar包是否存在
+     *
      * @param fileName 文件名，不含后缀
      */
     public boolean isJarFileExists(String fileName) {
@@ -55,6 +59,7 @@ public class BaseJarFileService {
 
     /**
      * 获取用于写入的输出流(覆盖写入)
+     *
      * @param fileName same as JobName
      */
     public OutputStream getOutputStream(String fileName) throws IOException {
@@ -68,5 +73,14 @@ public class BaseJarFileService {
     public InputStream getInputStream(String fileName) throws IOException {
         Path jarPath = dataPath.resolve(fileName + SUFFIX);
         return Files.newInputStream(jarPath);
+    }
+
+    public Path getJarFilePath(String fileBaseName) {
+        return dataPath.resolve(fileBaseName + ".jar");
+    }
+
+    public URL getJarFileUrl(String fileBaseName) throws MalformedURLException {
+        Path jarPath = getJarFilePath(fileBaseName);
+        return jarPath.toUri().toURL();
     }
 }
