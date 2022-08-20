@@ -18,7 +18,12 @@ public class OutGoingStream {
 
     public OutGoingStream addSchema(String streamId, Field... fields) {
         ApiUtil.validateId(streamId);
-        MessageDefinition.Builder msgDefBuilder = MessageDefinition.newBuilder("EventData");
+        MessageDefinition.Builder msgDefBuilder = MessageDefinition.newBuilder("TupleData");
+
+        // fields used by acker
+        msgDefBuilder.addField(FieldType.STRING, "_topologyName");
+        msgDefBuilder.addField(FieldType.INT, "_spoutTupleId");
+        msgDefBuilder.addField(FieldType.INT, "_traceId");
 
         for (Field f : fields) {
             msgDefBuilder.addField(f.getFieldType(), f.getFieldName());

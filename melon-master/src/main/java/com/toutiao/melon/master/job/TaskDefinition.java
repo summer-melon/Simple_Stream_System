@@ -63,4 +63,14 @@ public class TaskDefinition {
     public void setOutboundStreamIds(List<String> outboundStreamIds) {
         this.outboundStreamIds = outboundStreamIds;
     }
+
+    @Override
+    public String toString() {
+        return "TaskDefinition{"
+                + "processNum=" + processNum
+                + ", threadsPerProcess=" + threadsPerProcess
+                + ", inboundStreamIds=" + inboundStreamIds
+                + ", outboundStreamIds=" + outboundStreamIds
+                + '}';
+    }
 }
