@@ -47,7 +47,7 @@ public class ManageJobController extends ManageJobImplBase {
                         ManageJobRequestMetadata metadata = value.getMetadata();
                         requestType = metadata.getRequestType();
                         jobName = metadata.getJobName();
-                        validateJobName();
+                        validateTopologyName();
                         if (message == null) {
                             jarFileOutputStream = getJarFileOutputStream();
                         }
@@ -103,10 +103,10 @@ public class ManageJobController extends ManageJobImplBase {
                 }
             }
 
-            private void validateJobName() {
+            private void validateTopologyName() {
                 if (!RequestType.QUERY_RUNNING_JOB.equals(requestType)
                         && !jobName.matches("[a-zA-Z0-9]+")) {
-                    message = "Only alphanumeric characters allowed for jobName";
+                    message = "Only alphanumeric characters allowed for topologyName";
                 }
             }
 
@@ -123,18 +123,18 @@ public class ManageJobController extends ManageJobImplBase {
                 return null;
             }
 
-            private String formatRunningJobs(Map<String, String> runningJobs) {
-                StringBuilder builder = new StringBuilder("Running jobs:\n");
-                boolean hasJob = false;
-                for (Map.Entry<String, String> e : runningJobs.entrySet()) {
+            private String formatRunningTopologies(Map<String, String> runningTopologies) {
+                StringBuilder builder = new StringBuilder("Running topologies:\n");
+                boolean hasTopology = false;
+                for (Map.Entry<String, String> e : runningTopologies.entrySet()) {
                     if ("run".equals(e.getValue())) {
                         builder.append("  ");
                         builder.append(e.getKey());
                         builder.append("\n");
-                        hasJob = true;
+                        hasTopology = true;
                     }
                 }
-                if (!hasJob) {
+                if (!hasTopology) {
                     builder.append("  <none>\n");
                 }
                 return builder.toString();
@@ -145,11 +145,11 @@ public class ManageJobController extends ManageJobImplBase {
                     switch (requestType) {
                         case START_JOB:
                             if (jobName.length() > Byte.MAX_VALUE) {
-                                message = "Length of job name shouldn't be more than 127";
+                                message = "Length of topology name shouldn't be more than 127";
                             }
 
-                            if (zkService.jobExists(jobName)) {
-                                message = "Job exists";
+                            if (zkService.topologyExists(jobName)) {
+                                message = "Topology exists";
                                 break;
                             }
 
@@ -157,9 +157,9 @@ public class ManageJobController extends ManageJobImplBase {
                                 URL jarLocalUrl = jarService.getJarFileUrl(jobName);
                                 ComputationGraph computationGraph =
                                         new JobLoader().load(jobName, jarLocalUrl);
-                                zkService.startJob(jobName, computationGraph);
+                                zkService.startTopology(jobName, computationGraph);
                             } catch (Throwable e) {
-                                message = "Unable to start job: " + e.toString();
+                                message = "Unable to start topology: " + e.toString();
                                 break;
                             }
 
@@ -167,17 +167,17 @@ public class ManageJobController extends ManageJobImplBase {
                             break;
                         case STOP_JOB:
                             try {
-                                zkService.stopJob(jobName);
+                                zkService.stopTopology(jobName);
                                 jarService.deleteJarFile(jobName);
                             } catch (Throwable t) {
-                                message = "Failed to stop job: " + t.toString();
+                                message = "Failed to stop topology: " + t.toString();
                                 break;
                             }
 
                             message = "Success";
                             break;
                         case QUERY_RUNNING_JOB:
-                            message = formatRunningJobs(zkService.getRunningJobs());
+                            message = formatRunningTopologies(zkService.getRunningTopologies());
                             break;
                         default:
                             log.error("Not Support.");

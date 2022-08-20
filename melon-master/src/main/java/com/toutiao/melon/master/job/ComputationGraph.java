@@ -6,7 +6,7 @@ import java.util.Map;
 public class ComputationGraph {
     // nodeId => TaskDefinition
     private Map<String, TaskDefinition> tasks;
-    // Refer to JobLoader#getAssignOrder
+    // Refer to TopologyLoader#getAssignOrder
     private List<String> assignOrder;
 
     public int getTotalThreads() {

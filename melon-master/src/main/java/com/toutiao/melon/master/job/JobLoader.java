@@ -29,11 +29,11 @@ public class JobLoader {
     private Map<String, Node> nodes;
     private Map<String, List<Edge>> graph;
 
-    public ComputationGraph load(String jobName, URL jarLocalUrl) throws Throwable {
+    public ComputationGraph load(String topologyName, URL jarLocalUrl) throws Throwable {
         URL[] url = {jarLocalUrl};
         try (URLClassLoader loader = URLClassLoader.newInstance(url)) {
-            loadJobDefinition(jobName, loader, jarLocalUrl);
-            validateJob(jobName, loader);
+            loadTopologyDefinition(topologyName, loader, jarLocalUrl);
+            validateTopology(topologyName, loader);
             String sourceId = getSourceId(loader);
             // nodeId => TaskDefinition
             Map<String, TaskDefinition> tasks = detectCycleAndConnectivity(sourceId);
@@ -45,7 +45,7 @@ public class JobLoader {
             TaskDefinition ackerTask = new TaskDefinition();
             ackerTask.setProcessNum(1);
             ackerTask.setThreadsPerProcess(3);
-            ackerTask.setInboundStreamIds(Lists.newArrayList(jobName + "-~ackerInbound"));
+            ackerTask.setInboundStreamIds(Lists.newArrayList(topologyName + "-~ackerInbound"));
             computationGraph.getTasks().put("~acker", ackerTask);
             return computationGraph;
         }
@@ -127,7 +127,7 @@ public class JobLoader {
         // instances associated to nodeId
         Map<String, Set<TaskInstance>> instanceMap = new HashMap<>();
         Map<TaskInstance, Set<TaskInstance>> retGraph = new HashMap<>();
-        List<String> sortedNodes = getReverseJobOrder();
+        List<String> sortedNodes = getReverseTopologicalOrder();
         for (String n : sortedNodes) {
             int processNum = nodes.get(n).getProcessNum();
             Set<TaskInstance> nextInstances = new HashSet<>();
@@ -153,7 +153,7 @@ public class JobLoader {
                 .collect(Collectors.toMap(Map.Entry::getKey, x -> new ArrayList<>(x.getValue())));
     }
 
-    private List<String> getReverseJobOrder() {
+    private List<String> getReverseTopologicalOrder() {
         Map<String, Integer> outboundEdgesCount = new HashMap<>();
         Map<String, List<String>> prevNodeMap = new HashMap<>();
         Queue<String> processQueue = new ArrayDeque<>();
@@ -195,28 +195,28 @@ public class JobLoader {
         return sorted;
     }
 
-    private void loadJobDefinition(
-            String jobName, URLClassLoader loader, URL jarLocalUrl) throws Throwable {
+    private void loadTopologyDefinition(
+            String topologyName, URLClassLoader loader, URL jarLocalUrl) throws Throwable {
         Class<?> mainClass;
         try (JarFile jarFile = new JarFile(jarLocalUrl.getFile())) {
             String mainClassName = jarFile.getManifest().getMainAttributes().getValue("Main-Class");
             mainClass = loader.loadClass(mainClassName);
-            Job job = ((IJob) mainClass.getDeclaredConstructor().newInstance()).getJob();
-            nodes = job.getNodes();
-            graph = job.getEdges();
+            Job topology = ((IJob) mainClass.getDeclaredConstructor().newInstance()).getJob();
+            nodes = topology.getNodes();
+            graph = topology.getEdges();
 
-            // add "jobName-" prefix for streamId
+            // add "topologyName-" prefix for streamId
             graph.values().forEach(li ->
-                    li.forEach(edge -> edge.setStreamId(jobName + "-" + edge.getStreamId())));
+                    li.forEach(edge -> edge.setStreamId(topologyName + "-" + edge.getStreamId())));
         }
     }
 
-    private void validateJob(String jobName, URLClassLoader loader) throws Throwable {
+    private void validateTopology(String topologyName, URLClassLoader loader) throws Throwable {
         for (Map.Entry<String, List<Edge>> e : graph.entrySet()) {
             String sourceId = e.getKey();
 
             Class<?> sourceClass = loader.loadClass(nodes.get(sourceId).getClassName());
-            OutGoingStream declarer = new OutGoingStream(jobName, sourceId);
+            OutGoingStream declarer = new OutGoingStream(topologyName, sourceId);
             ((IOutStream) sourceClass.getDeclaredConstructor()
                     .newInstance()).defineOutGoingStream(declarer);
             Set<String> schemaNames = declarer.getOutGoingStreamSchemas().keySet();
@@ -280,7 +280,7 @@ public class JobLoader {
             }
             String thisNode = edges.get(s.edgeIndex).getTargetId();
             if (grayNodes.containsKey(thisNode)) {
-                throw new JobException("Cycle detected in job");
+                throw new JobException("Cycle detected in topology");
             }
             if (blackNodes.containsKey(thisNode)) {
                 continue;
