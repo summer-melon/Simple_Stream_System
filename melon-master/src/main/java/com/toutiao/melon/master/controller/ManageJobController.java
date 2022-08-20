@@ -2,6 +2,7 @@ package com.toutiao.melon.master.controller;
 
 import com.toutiao.melon.master.job.ComputationGraph;
 import com.toutiao.melon.master.job.JobLoader;
+import com.toutiao.melon.master.job.TaskDefinition;
 import com.toutiao.melon.master.service.JarFileService;
 import com.toutiao.melon.master.service.ZooKeeperService;
 import com.toutiao.melon.rpc.ManageJobGrpc.ManageJobImplBase;
@@ -157,6 +158,15 @@ public class ManageJobController extends ManageJobImplBase {
                                 URL jarLocalUrl = jarService.getJarFileUrl(jobName);
                                 ComputationGraph computationGraph =
                                         new JobLoader().load(jobName, jarLocalUrl);
+                                log.info("{}", computationGraph.getAssignOrder().size());
+                                for (String order : computationGraph.getAssignOrder()) {
+                                    log.info("计算图顺序: {}", order);
+                                }
+                                Map<String, TaskDefinition> tasks = computationGraph.getTasks();
+                                for (String nodeId : tasks.keySet()) {
+                                    log.info("nodeId: {}, 计算图任务分配: {}", nodeId, tasks.get(nodeId));
+                                }
+
                                 zkService.startTopology(jobName, computationGraph);
                             } catch (Throwable e) {
                                 message = "Unable to start topology: " + e.toString();
