@@ -1,24 +1,24 @@
 package com.toutiao.melon.master.controller;
 
-import com.toutiao.melon.master.service.JarFileService;
-import com.toutiao.melon.master.service.ZooKeeperService;
 import com.toutiao.melon.master.job.ComputationGraph;
 import com.toutiao.melon.master.job.JobLoader;
+import com.toutiao.melon.master.service.JarFileService;
+import com.toutiao.melon.master.service.ZooKeeperService;
 import com.toutiao.melon.rpc.ManageJobGrpc.ManageJobImplBase;
 import com.toutiao.melon.rpc.ManageJobRequest;
 import com.toutiao.melon.rpc.ManageJobRequestMetadata;
 import com.toutiao.melon.rpc.ManageJobRequestMetadata.RequestType;
 import com.toutiao.melon.rpc.ManageJobResponse;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Singleton
 public class ManageJobController extends ManageJobImplBase {
@@ -31,7 +31,8 @@ public class ManageJobController extends ManageJobImplBase {
     private ZooKeeperService zkService;
 
     @Override
-    public StreamObserver<ManageJobRequest> manageJob(StreamObserver<ManageJobResponse> responseObserver) {
+    public StreamObserver<ManageJobRequest> manageJob(
+            StreamObserver<ManageJobResponse> responseObserver) {
         return new StreamObserver<ManageJobRequest>() {
 
             RequestType requestType = RequestType.UNRECOGNIZED;
@@ -154,8 +155,9 @@ public class ManageJobController extends ManageJobImplBase {
 
                             try {
                                 URL jarLocalUrl = jarService.getJarFileUrl(jobName);
-                                ComputationGraph cGraph = new JobLoader().load(jobName, jarLocalUrl);
-                                zkService.startTopology(jobName, cGraph);
+                                ComputationGraph computationGraph =
+                                        new JobLoader().load(jobName, jarLocalUrl);
+                                zkService.startTopology(jobName, computationGraph);
                             } catch (Throwable e) {
                                 message = "Unable to start topology: " + e.toString();
                                 break;
@@ -177,6 +179,9 @@ public class ManageJobController extends ManageJobImplBase {
                         case QUERY_RUNNING_JOB:
                             message = formatRunningTopologies(zkService.getRunningTopologies());
                             break;
+                        default:
+                            log.error("Not Support.");
+                            System.exit(-1);
                     }
                 }
             }

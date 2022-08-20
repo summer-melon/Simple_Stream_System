@@ -4,11 +4,10 @@ import com.google.protobuf.Empty;
 import com.toutiao.melon.rpc.RpcEvent;
 import com.toutiao.melon.rpc.TransmitEventGrpc.TransmitEventImplBase;
 import io.grpc.stub.StreamObserver;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.inject.Singleton;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Singleton

@@ -9,16 +9,19 @@ import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.zookeeper.Watcher;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.zookeeper.Watcher;
 
 @Slf4j
 @Singleton
@@ -101,18 +104,18 @@ public class TransmitTupleClientThread implements Runnable {
                 stub.transmitEvent(RpcEvent.newBuilder()
                         .setEventBytes(ByteString.copyFrom(output.getBytes()))
                         .build(), new StreamObserver<Empty>() {
-                    @Override
-                    public void onNext(Empty value) {
-                    }
+                            @Override
+                            public void onNext(Empty value) {
+                            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                    }
+                            @Override
+                            public void onError(Throwable t) {
+                            }
 
-                    @Override
-                    public void onCompleted() {
-                    }
-                });
+                            @Override
+                            public void onCompleted() {
+                            }
+                        });
             } catch (Throwable t) {
                 log.error(t.toString());
             } finally {

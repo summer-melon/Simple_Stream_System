@@ -3,16 +3,17 @@ package com.toutiao.melon.workerprocess.thread;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.DynamicMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
-
-
 import com.toutiao.melon.api.IOperator;
 import com.toutiao.melon.api.IOutStream;
 import com.toutiao.melon.api.ISource;
 import com.toutiao.melon.api.message.DynamicSchema;
-
 import com.toutiao.melon.api.stream.Collector;
 import com.toutiao.melon.api.stream.Event;
-import com.toutiao.melon.workerprocess.acker.*;
+import com.toutiao.melon.workerprocess.acker.Acker;
+import com.toutiao.melon.workerprocess.acker.AckerPubSubCodec;
+import com.toutiao.melon.workerprocess.acker.CachedComputedOutput;
+import com.toutiao.melon.workerprocess.acker.TopologyTupleId;
+import com.toutiao.melon.workerprocess.acker.TupleCacheCodec;
 import com.toutiao.melon.workerprocess.job.OutputCollectorImpl;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -21,13 +22,12 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ComputeThread implements Runnable {
@@ -68,7 +68,8 @@ public class ComputeThread implements Runnable {
         } else if (ioutStream instanceof IOperator) {
             boltLoop();
         } else { // ISpout
-            RedisAsyncCommands<TopologyTupleId, CachedComputedOutput> tupleCacheCommands = registerReplay();
+            RedisAsyncCommands<TopologyTupleId, CachedComputedOutput> tupleCacheCommands =
+                    registerReplay();
             spoutLoop(tupleCacheCommands);
         }
     }
@@ -78,7 +79,8 @@ public class ComputeThread implements Runnable {
         RedisClient tupleCacheClient = RedisClient.create(tupleCacheUriStr);
         StatefulRedisConnection<TopologyTupleId, CachedComputedOutput> cacheConn =
                 tupleCacheClient.connect(new TupleCacheCodec());
-        RedisAsyncCommands<TopologyTupleId, CachedComputedOutput> tupleCacheCommands = cacheConn.async();
+        RedisAsyncCommands<TopologyTupleId, CachedComputedOutput> tupleCacheCommands =
+                cacheConn.async();
 
         String traceRedisUriStr = System.getProperty("stormy.redis.trace_uri");
         RedisURI traceRedisUri = RedisURI.create(traceRedisUriStr);
@@ -108,7 +110,8 @@ public class ComputeThread implements Runnable {
         return tupleCacheCommands;
     }
 
-    private void spoutLoop(RedisAsyncCommands<TopologyTupleId, CachedComputedOutput> tupleCacheCommands) {
+    private void spoutLoop(
+            RedisAsyncCommands<TopologyTupleId, CachedComputedOutput> tupleCacheCommands) {
         ISource spout = (ISource) ioutStream;
         Collector outputCollector = new OutputCollectorImpl(
                 this.outboundSchemaMap,
@@ -120,9 +123,12 @@ public class ComputeThread implements Runnable {
                     msgBuilder.setField(msgDesc.findFieldByName("_spoutTupleId"), spoutTupleId);
                     msgBuilder.setField(msgDesc.findFieldByName("_traceId"), traceId);
 
-                    ComputedOutput output = new ComputedOutput(targetStreamId, msgBuilder.build().toByteArray());
-                    TopologyTupleId topologyTupleId = new TopologyTupleId(topologyName, spoutTupleId);
-                    tupleCacheCommands.set(topologyTupleId, new CachedComputedOutput(traceId, threadId, output));
+                    ComputedOutput output =
+                            new ComputedOutput(targetStreamId, msgBuilder.build().toByteArray());
+                    TopologyTupleId topologyTupleId =
+                            new TopologyTupleId(topologyName, spoutTupleId);
+                    tupleCacheCommands.set(topologyTupleId,
+                            new CachedComputedOutput(traceId, threadId, output));
                     // TODO: reconsider tuple cache time
                     tupleCacheCommands.expire(topologyTupleId, 20);
                     ack(topologyName, spoutTupleId, traceId);
@@ -190,7 +196,8 @@ public class ComputeThread implements Runnable {
         }
     }
 
-    private Event decodeInboundMessage() throws InterruptedException, InvalidProtocolBufferException {
+    private Event decodeInboundMessage()
+            throws InterruptedException, InvalidProtocolBufferException {
         byte[] messageBytes = inboundQueue.take();
         DynamicMessage.Builder parsedMessageBuilder = inboundSchema.newMessageBuilder("TupleData");
         Descriptors.Descriptor parsedMsgDesc = parsedMessageBuilder.getDescriptorForType();

@@ -6,13 +6,12 @@ import com.toutiao.melon.rpc.ProvideJarGrpc.ProvideJarImplBase;
 import com.toutiao.melon.rpc.ProvideJarRequest;
 import com.toutiao.melon.rpc.ProvideJarResponse;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ProvideJarController extends ProvideJarImplBase {
@@ -22,7 +21,8 @@ public class ProvideJarController extends ProvideJarImplBase {
     private JarFileService jarService;
 
     @Override
-    public void provideJar(ProvideJarRequest request, StreamObserver<ProvideJarResponse> responseObserver) {
+    public void provideJar(
+            ProvideJarRequest request, StreamObserver<ProvideJarResponse> responseObserver) {
         String jobName = request.getJobName();
         ProvideJarResponse.Builder responseBuilder = ProvideJarResponse.newBuilder();
         if (!jarService.isJarFileExists(jobName)) {

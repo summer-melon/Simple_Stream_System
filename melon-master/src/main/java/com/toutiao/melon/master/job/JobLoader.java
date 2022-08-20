@@ -9,10 +9,17 @@ import com.toutiao.melon.api.job.Job;
 import com.toutiao.melon.api.job.JobException;
 import com.toutiao.melon.api.job.Node;
 import com.toutiao.melon.api.stream.OutGoingStream;
-
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -30,16 +37,17 @@ public class JobLoader {
             String sourceId = getSourceId(loader);
             // nodeId => TaskDefinition
             Map<String, TaskDefinition> tasks = detectCycleAndConnectivity(sourceId);
-            ComputationGraph cGraph = new ComputationGraph(tasks, getAssignOrder(sourceId));
+            ComputationGraph computationGraph =
+                    new ComputationGraph(tasks, getAssignOrder(sourceId));
 
             // add acker
-            cGraph.getAssignOrder().add("~acker");
+            computationGraph.getAssignOrder().add("~acker");
             TaskDefinition ackerTask = new TaskDefinition();
             ackerTask.setProcessNum(1);
             ackerTask.setThreadsPerProcess(3);
             ackerTask.setInboundStreamIds(Lists.newArrayList(topologyName + "-~ackerInbound"));
-            cGraph.getTasks().put("~acker", ackerTask);
-            return cGraph;
+            computationGraph.getTasks().put("~acker", ackerTask);
+            return computationGraph;
         }
     }
 
@@ -112,7 +120,8 @@ public class JobLoader {
         return retOrder;
     }
 
-    // Convert a graph like A -> B(with 2 processes) -> C to A#0 -> B#0 -> C#0 plus A#0 -> B#1 -> C#0.
+    // Convert a graph like A -> B(with 2 processes) -> C to
+    // A#0 -> B#0 -> C#0 plus A#0 -> B#1 -> C#0.
     // SourceId#0 is the only instance ensured for source.
     private Map<TaskInstance, List<TaskInstance>> augmentGraph() {
         // instances associated to nodeId
@@ -186,7 +195,8 @@ public class JobLoader {
         return sorted;
     }
 
-    private void loadTopologyDefinition(String topologyName, URLClassLoader loader, URL jarLocalUrl) throws Throwable {
+    private void loadTopologyDefinition(
+            String topologyName, URLClassLoader loader, URL jarLocalUrl) throws Throwable {
         Class<?> mainClass;
         try (JarFile jarFile = new JarFile(jarLocalUrl.getFile())) {
             String mainClassName = jarFile.getManifest().getMainAttributes().getValue("Main-Class");
@@ -207,7 +217,8 @@ public class JobLoader {
 
             Class<?> sourceClass = loader.loadClass(nodes.get(sourceId).getClassName());
             OutGoingStream declarer = new OutGoingStream(topologyName, sourceId);
-            ((IOutStream) sourceClass.getDeclaredConstructor().newInstance()).defineOutGoingStream(declarer);
+            ((IOutStream) sourceClass.getDeclaredConstructor()
+                    .newInstance()).defineOutGoingStream(declarer);
             Set<String> schemaNames = declarer.getOutGoingStreamSchemas().keySet();
             if (schemaNames.size() != e.getValue().size()) {
                 throw new Exception("Number of schemas defined in '" + sourceId
@@ -248,7 +259,8 @@ public class JobLoader {
     }
 
     // Refer to CLRS, returns a Map, which maps nodeId => TaskDefinition
-    private Map<String, TaskDefinition> detectCycleAndConnectivity(String sourceId) throws JobException {
+    private Map<String, TaskDefinition> detectCycleAndConnectivity(String sourceId)
+            throws JobException {
         Map<String, TaskDefinition> grayNodes = new HashMap<>();
         Map<String, TaskDefinition> blackNodes = new HashMap<>();
         grayNodes.put(sourceId, new TaskDefinition(nodes.get(sourceId), graph.get(sourceId)));
@@ -275,10 +287,12 @@ public class JobLoader {
             }
 
             if (graph.containsKey(thisNode)) {
-                grayNodes.put(thisNode, new TaskDefinition(nodes.get(thisNode), graph.get(thisNode)));
+                grayNodes.put(thisNode,
+                        new TaskDefinition(nodes.get(thisNode), graph.get(thisNode)));
                 states.push(new DfsState<>(thisNode, 0));
             } else {
-                blackNodes.put(thisNode, new TaskDefinition(nodes.get(thisNode), new ArrayList<>()));
+                blackNodes.put(thisNode,
+                        new TaskDefinition(nodes.get(thisNode), new ArrayList<>()));
             }
         }
 

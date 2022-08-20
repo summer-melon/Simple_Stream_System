@@ -3,14 +3,20 @@ package com.toutiao.melon.master;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.toutiao.melon.master.controller.ManageJobController;
-import com.toutiao.melon.shared.GuiceModule;
 import com.toutiao.melon.master.controller.ProvideJarController;
-import io.grpc.*;
+import com.toutiao.melon.shared.GuiceModule;
+import io.grpc.BindableService;
+import io.grpc.Metadata;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 public class MasterServer {
 

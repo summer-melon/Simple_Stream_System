@@ -1,9 +1,6 @@
-
-
 package com.toutiao.melon.workerprocess.acker;
 
 import io.lettuce.core.codec.RedisCodec;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 

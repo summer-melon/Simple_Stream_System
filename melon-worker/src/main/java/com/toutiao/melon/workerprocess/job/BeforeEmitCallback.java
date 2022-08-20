@@ -7,5 +7,7 @@ import com.toutiao.melon.workerprocess.thread.ComputedOutput;
 @FunctionalInterface
 public interface BeforeEmitCallback {
 
-    ComputedOutput accept(DynamicMessage.Builder msgBuilder, Descriptors.Descriptor msgDesc, String targetStreamId);
+    ComputedOutput accept(DynamicMessage.Builder msgBuilder,
+                          Descriptors.Descriptor msgDesc,
+                          String targetStreamId);
 }

@@ -2,7 +2,6 @@ package com.toutiao.melon.workerprocess.acker;
 
 import com.toutiao.melon.workerprocess.thread.ComputedOutput;
 import io.lettuce.core.codec.RedisCodec;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -26,8 +25,10 @@ public class TupleCacheCodec implements RedisCodec<TopologyTupleId, CachedComput
         bytes.get(streamIdBytes);
         byte[] dataBytes = new byte[bytes.remaining()];
         bytes.get(dataBytes);
-        ComputedOutput out = new ComputedOutput(new String(streamIdBytes, StandardCharsets.UTF_8), dataBytes);
-        return new CachedComputedOutput(initTraceId, new String(threadIdBytes, StandardCharsets.UTF_8), out);
+        ComputedOutput out = new ComputedOutput(
+                new String(streamIdBytes, StandardCharsets.UTF_8), dataBytes);
+        return new CachedComputedOutput(initTraceId,
+                new String(threadIdBytes, StandardCharsets.UTF_8), out);
     }
 
     @Override
@@ -40,7 +41,8 @@ public class TupleCacheCodec implements RedisCodec<TopologyTupleId, CachedComput
         ComputedOutput out = value.getComputedOutput();
         byte[] threadIdBytes = value.getThreadId().getBytes(StandardCharsets.UTF_8);
         byte[] streamIdBytes = out.getStreamId().getBytes(StandardCharsets.UTF_8);
-        ByteBuffer buf = ByteBuffer.allocate(12 + threadIdBytes.length + streamIdBytes.length + out.getBytes().length);
+        ByteBuffer buf = ByteBuffer.allocate(
+                12 + threadIdBytes.length + streamIdBytes.length + out.getBytes().length);
         buf.putInt(value.getInitTraceId());
         buf.putInt(threadIdBytes.length);
         buf.put(threadIdBytes);

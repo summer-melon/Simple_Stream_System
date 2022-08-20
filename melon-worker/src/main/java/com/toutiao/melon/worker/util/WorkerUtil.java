@@ -1,11 +1,8 @@
-
-
 package com.toutiao.melon.worker.util;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT;
-
 import java.io.File;
 import java.lang.reflect.Field;
 
@@ -28,20 +25,19 @@ public class WorkerUtil {
         long result = -1;
         try {
             //for windows
-            if (p.getClass().getName().equals("java.lang.Win32Process") ||
-                    p.getClass().getName().equals("java.lang.ProcessImpl")) {
+            if (p.getClass().getName().equals("java.lang.Win32Process")
+                    || p.getClass().getName().equals("java.lang.ProcessImpl")) {
                 Field f = p.getClass().getDeclaredField("handle");
                 f.setAccessible(true);
-                long pHandle = f.getLong(p);
+                long phandle = f.getLong(p);
                 Kernel32 kernel = Kernel32.INSTANCE;
                 WinNT.HANDLE ntHandle = new WinNT.HANDLE();
-                ntHandle.setPointer(Pointer.createConstant(pHandle));
+                ntHandle.setPointer(Pointer.createConstant(phandle));
                 result = kernel.GetProcessId(ntHandle);
                 kernel.CloseHandle(ntHandle);
                 f.setAccessible(false);
-            }
-            //for unix based operating systems
-            else if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+            } else if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+                //for unix based operating systems
                 Field f = p.getClass().getDeclaredField("pid");
                 f.setAccessible(true);
                 result = f.getLong(p);

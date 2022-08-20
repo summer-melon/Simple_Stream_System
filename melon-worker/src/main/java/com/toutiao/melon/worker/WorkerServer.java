@@ -1,4 +1,5 @@
 package com.toutiao.melon.worker;
+
 import com.toutiao.melon.rpc.ProvideJarGrpc;
 import com.toutiao.melon.rpc.ProvideJarGrpc.ProvideJarStub;
 import com.toutiao.melon.rpc.ProvideJarRequest;
@@ -11,15 +12,6 @@ import com.toutiao.melon.workerprocess.WorkerProcessMain;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.Watcher;
-import oshi.SystemInfo;
-import oshi.software.os.OSProcess;
-import oshi.software.os.OperatingSystem;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -28,6 +20,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.Watcher;
+import oshi.SystemInfo;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
+
 
 @Slf4j
 @Singleton
