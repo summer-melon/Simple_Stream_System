@@ -7,6 +7,6 @@ import javax.inject.Singleton;
 public class JarFileService extends BaseJarFileService {
 
     public JarFileService() {
-        super("stormy-master");
+        super("melon-master");
     }
 }
