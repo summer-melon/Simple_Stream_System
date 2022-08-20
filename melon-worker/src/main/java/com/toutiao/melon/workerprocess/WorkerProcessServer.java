@@ -23,8 +23,6 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -56,8 +54,6 @@ public class WorkerProcessServer {
     private ZooKeeperConnection zkConn;
 
 
-    @Inject
-    PrometheusMeterRegistry prometheusRegistry;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool(r -> {
         Thread t = Executors.defaultThreadFactory().newThread(r);
@@ -118,11 +114,6 @@ public class WorkerProcessServer {
         }
         threadPool.submit(messageSender);
         IOutStream op = opClass.newInstance();
-        if (op instanceof Acker) {
-            Counter tupleCount = prometheusRegistry.counter("topology.tuple.count");
-            Counter latencySum = prometheusRegistry.counter("topology.latency.sum");
-            ((Acker) op).setCounters(tupleCount, latencySum);
-        }
         for (int i = 0; i < threadNum; ++i) {
             threadPool.submit(new ComputeThread(taskFullName + i,
                     topologyName, op, inboundSchema, outboundSchemaMap,
