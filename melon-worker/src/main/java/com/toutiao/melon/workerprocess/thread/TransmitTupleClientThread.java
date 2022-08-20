@@ -20,13 +20,14 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @Singleton
 public class TransmitTupleClientThread implements Runnable {
 
+    private static final Logger log = LoggerFactory.getLogger(TransmitTupleClientThread.class);
     @Inject
     private ZooKeeperConnection zkConn;
 

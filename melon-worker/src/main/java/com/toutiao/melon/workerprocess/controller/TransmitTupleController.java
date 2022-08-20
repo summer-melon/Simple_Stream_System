@@ -7,11 +7,13 @@ import io.grpc.stub.StreamObserver;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Singleton;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @Singleton
 public class TransmitTupleController extends TransmitEventImplBase {
+
+    private static final Logger log = LoggerFactory.getLogger(TransmitTupleController.class);
 
     private static final Empty EMPTY_MESSAGE = Empty.newBuilder().build();
 
