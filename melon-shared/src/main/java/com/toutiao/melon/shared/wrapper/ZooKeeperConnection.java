@@ -75,8 +75,7 @@ public class ZooKeeperConnection {
         }
         try {
             zk.create(path, dataByte, ZooDefs.Ids.OPEN_ACL_UNSAFE, createMode);
-        } catch (KeeperException | InterruptedException e) {
-            log.error("ZooKeeper create node fail: {}", e.toString());
+        } catch (Throwable ignored) {
             return false;
         }
         return true;
