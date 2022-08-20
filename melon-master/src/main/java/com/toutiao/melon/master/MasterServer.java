@@ -41,8 +41,8 @@ public class MasterServer {
                         return next.startCall(call, headers);
                     }
                 })
-                .addService((BindableService) injector.getInstance(ManageJobController.class))
-                .addService((BindableService) injector.getInstance(ProvideJarController.class))
+                .addService(injector.getInstance(ManageJobController.class))
+                .addService(injector.getInstance(ProvideJarController.class))
                 .build()
                 .start();
 
