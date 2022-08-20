@@ -25,13 +25,12 @@ import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class ComputeThread implements Runnable {
 
+    private static final Logger log = LoggerFactory.getLogger(ComputeThread.class);
     private final String threadId;
     private final String topologyName;
     private final IOutStream ioutStream;
@@ -146,10 +145,23 @@ public class ComputeThread implements Runnable {
         }
     }
 
-    @Data
-    @NoArgsConstructor
     private static class Wrapper<T> {
         T value;
+
+        public Wrapper() {
+        }
+
+        public Wrapper(T value) {
+            this.value = value;
+        }
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(T value) {
+            this.value = value;
+        }
     }
 
     private void boltLoop() {

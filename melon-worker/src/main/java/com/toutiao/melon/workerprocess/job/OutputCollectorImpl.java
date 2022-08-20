@@ -10,11 +10,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class OutputCollectorImpl implements Collector {
 
+    private static final Logger log = LoggerFactory.getLogger(OutputCollectorImpl.class);
     private final Map<String, DynamicSchema> outboundSchemaMap;
     private final BlockingQueue<ComputedOutput> outboundQueue;
     private final BeforeEmitCallback beforeEmit;

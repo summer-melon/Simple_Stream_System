@@ -22,18 +22,18 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 
-
-@Slf4j
 @Singleton
 public class WorkerServer {
 
+    private static final Logger log = LoggerFactory.getLogger(WorkerServer.class);
     @Inject
     private ZooKeeperConnection zkConn;
 

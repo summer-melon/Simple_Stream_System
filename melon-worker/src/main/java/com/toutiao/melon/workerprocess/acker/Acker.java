@@ -11,12 +11,12 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.micrometer.core.instrument.Counter;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-
-@Slf4j
 public class Acker implements IOperator {
 
+    private static final Logger log = LoggerFactory.getLogger(Acker.class);
     private final RedisAsyncCommands<TopologyTupleId, Integer> redisCommands;
     private final TopologyTupleId tmpKey = new TopologyTupleId("tmpKey", 0);
     private String getTupleAckTimeScript;

@@ -34,16 +34,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Transaction;
 import org.apache.zookeeper.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @Singleton
 public class WorkerProcessServer {
 
+    private static final Logger log = LoggerFactory.getLogger(WorkerProcessServer.class);
     @Inject
     private TransmitTupleController messageReceiver;
 
@@ -122,9 +122,23 @@ public class WorkerProcessServer {
         // TODO: add thread monitor as new thread
     }
 
-    @Data
     private static class BytesWrapper {
         private byte[] bytes;
+
+        public BytesWrapper() {
+        }
+
+        public BytesWrapper(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        public void setBytes(byte[] bytes) {
+            this.bytes = bytes;
+        }
     }
 
     private DynamicSchema blockUntilInboundSchemaAvailable() throws Throwable {
