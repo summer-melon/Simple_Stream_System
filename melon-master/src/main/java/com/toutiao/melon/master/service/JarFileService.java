@@ -1,7 +1,6 @@
 package com.toutiao.melon.master.service;
 
 import com.toutiao.melon.shared.service.BaseJarFileService;
-
 import javax.inject.Singleton;
 
 @Singleton

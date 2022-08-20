@@ -1,18 +1,16 @@
 package com.toutiao.melon.workerprocess.job;
 
-
-import com.toutiao.melon.api.IOutStream;
 import com.toutiao.melon.api.IJob;
-import com.toutiao.melon.api.job.Node;
+import com.toutiao.melon.api.IOutStream;
 import com.toutiao.melon.api.job.Job;
-import lombok.extern.slf4j.Slf4j;
-
+import com.toutiao.melon.api.job.Node;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OperatorLoader {
@@ -33,7 +31,8 @@ public class OperatorLoader {
         }
     }
 
-    private void loadAllClasses(Enumeration<JarEntry> jarEntries, URLClassLoader cl) throws ClassNotFoundException {
+    private void loadAllClasses(Enumeration<JarEntry> jarEntries, URLClassLoader cl)
+            throws ClassNotFoundException {
         while (jarEntries.hasMoreElements()) {
             JarEntry je = jarEntries.nextElement();
             if (je.isDirectory() || !je.getName().endsWith(".class")) {

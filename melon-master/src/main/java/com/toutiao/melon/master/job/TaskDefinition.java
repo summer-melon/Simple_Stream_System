@@ -2,7 +2,6 @@ package com.toutiao.melon.master.job;
 
 import com.toutiao.melon.api.job.Edge;
 import com.toutiao.melon.api.job.Node;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

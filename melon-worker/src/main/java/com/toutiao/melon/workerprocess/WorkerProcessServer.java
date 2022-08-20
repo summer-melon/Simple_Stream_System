@@ -1,4 +1,5 @@
 package com.toutiao.melon.workerprocess;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.protobuf.Descriptors;
@@ -12,26 +13,34 @@ import com.toutiao.melon.shared.util.SharedUtil;
 import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
 import com.toutiao.melon.workerprocess.acker.Acker;
 import com.toutiao.melon.workerprocess.controller.TransmitTupleController;
-import com.toutiao.melon.workerprocess.thread.ComputedOutput;
-import com.toutiao.melon.workerprocess.thread.ComputeThread;
-import com.toutiao.melon.workerprocess.thread.TransmitTupleClientThread;
 import com.toutiao.melon.workerprocess.job.OperatorLoader;
-import io.grpc.*;
+import com.toutiao.melon.workerprocess.thread.ComputeThread;
+import com.toutiao.melon.workerprocess.thread.ComputedOutput;
+import com.toutiao.melon.workerprocess.thread.TransmitTupleClientThread;
+import io.grpc.Metadata;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Transaction;
 import org.apache.zookeeper.Watcher;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Map;
-import java.util.concurrent.*;
 
 @Slf4j
 @Singleton
@@ -91,7 +100,8 @@ public class WorkerProcessServer {
             log.error(e.toString());
             System.exit(-1);
         }
-        Map<String, DynamicSchema> outboundSchemaMap = registerOutboundSchemas(opClass, ackerSchema);
+        Map<String, DynamicSchema> outboundSchemaMap =
+                registerOutboundSchemas(opClass, ackerSchema);
 
         BlockingQueue<byte[]> inboundQueue = messageReceiver.getInboundQueue();
         int port = startGrpcServer();
@@ -146,8 +156,9 @@ public class WorkerProcessServer {
         return DynamicSchema.parseFrom(wrapper.getBytes());
     }
 
-    private Map<String, DynamicSchema> registerOutboundSchemas(Class<? extends IOutStream> opClass,
-                                                               DynamicSchema ackerSchema) throws Throwable {
+    private Map<String, DynamicSchema> registerOutboundSchemas(
+            Class<? extends IOutStream> opClass, DynamicSchema ackerSchema)
+            throws Throwable {
         IOutStream operator = opClass.newInstance();
         OutGoingStream declarer = new OutGoingStream(topologyName, taskName);
         operator.defineOutGoingStream(declarer);

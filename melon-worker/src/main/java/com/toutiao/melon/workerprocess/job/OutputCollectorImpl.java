@@ -6,12 +6,11 @@ import com.toutiao.melon.api.message.DynamicSchema;
 import com.toutiao.melon.api.stream.Collector;
 import com.toutiao.melon.api.stream.Value;
 import com.toutiao.melon.workerprocess.thread.ComputedOutput;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OutputCollectorImpl implements Collector {

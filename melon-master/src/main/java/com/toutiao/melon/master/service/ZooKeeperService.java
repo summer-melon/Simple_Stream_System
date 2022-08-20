@@ -1,23 +1,29 @@
 package com.toutiao.melon.master.service;
 
+import static org.apache.zookeeper.ZooDefs.Ids.OPEN_ACL_UNSAFE;
+
 import com.toutiao.melon.master.job.ComputationGraph;
 import com.toutiao.melon.master.job.TaskDefinition;
+import com.toutiao.melon.shared.util.SharedUtil;
+import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Transaction;
-import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
-import com.toutiao.melon.shared.util.SharedUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-
-import static org.apache.zookeeper.ZooDefs.Ids.OPEN_ACL_UNSAFE;
 
 @Singleton
 public class ZooKeeperService {
@@ -100,13 +106,15 @@ public class ZooKeeperService {
         }
     }
 
-    public synchronized void startTopology(String topologyName, ComputationGraph cGraph) throws InterruptedException, KeeperException {
+    public synchronized void startTopology(String topologyName, ComputationGraph computationGraph)
+            throws InterruptedException, KeeperException {
         List<String> availableWorkers = zkConn.getChildren("/worker/available");
         if (availableWorkers.isEmpty()) {
             throw new RuntimeException("No workers available");
         }
-        AtomicInteger totalAssignedThreads = new AtomicInteger(cGraph.getTotalThreads());
-        Queue<LoadInfo> loadInfos = new PriorityQueue<>(Comparator.comparingInt(LoadInfo::getThreads));
+        AtomicInteger totalAssignedThreads = new AtomicInteger(computationGraph.getTotalThreads());
+        Queue<LoadInfo> loadInfos =
+                new PriorityQueue<>(Comparator.comparingInt(LoadInfo::getThreads));
         availableWorkers.stream()
                 .map(x -> {
                     String load = zkConn.get("/worker/registered/" + x);
@@ -120,8 +128,8 @@ public class ZooKeeperService {
                 .filter(Objects::nonNull)
                 .forEach(loadInfos::add);
         double avgThreads = (double) totalAssignedThreads.get() / loadInfos.size();
-        List<String> assignOrder = cGraph.getAssignOrder();
-        Map<String, TaskDefinition> tasks = cGraph.getTasks();
+        List<String> assignOrder = computationGraph.getAssignOrder();
+        Map<String, TaskDefinition> tasks = computationGraph.getTasks();
 
         Map<String, Integer> encodeHelper = new HashMap<>();
         Function<String, String> encodeAssignment = taskName -> {
@@ -136,8 +144,8 @@ public class ZooKeeperService {
             }
             int processIndex = encodeHelper.get(taskName) + 1;
             encodeHelper.put(taskName, processIndex);
-            return topologyName + "#" + taskName + "#" + processIndex + "#" + threadNum +
-                    "#" + inboundStr + "#" + outboundStr;
+            return topologyName + "#" + taskName + "#" + processIndex + "#" + threadNum
+                    + "#" + inboundStr + "#" + outboundStr;
         };
 
         int tmpThreads = 0;
@@ -192,13 +200,15 @@ public class ZooKeeperService {
             String workerPath = "/worker/registered/" + load.getWorkerId();
             txn.setData(workerPath, Integer.toString(load.getThreads()).getBytes(), -1);
             for (String assignment : load.getNewAssignments()) {
-                txn.create(workerPath + "/" + assignment, null, OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                txn.create(workerPath + "/" + assignment, null,
+                        OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             }
         }
-        txn.create("/master/topology/" + topologyName, "run".getBytes(), OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        try{
+        txn.create("/master/topology/" + topologyName, "run".getBytes(),
+                OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+        try {
             txn.commit();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn("The exception occurs, but skip now.");
         }
 
