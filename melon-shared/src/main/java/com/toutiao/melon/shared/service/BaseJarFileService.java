@@ -24,7 +24,7 @@ public class BaseJarFileService {
     private final Path dataPath;
 
     public BaseJarFileService(String dataDir) {
-        String tmpDir = System.getProperty("java.io.tmpDir");
+        String tmpDir = System.getProperty("java.io.tmpdir");
         dataPath = Paths.get(tmpDir, dataDir);
         if (Files.exists(dataPath)) {
             if (!Files.isDirectory(dataPath)) {

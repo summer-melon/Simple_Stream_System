@@ -5,7 +5,6 @@ import com.google.inject.Injector;
 import com.toutiao.melon.master.controller.ManageJobController;
 import com.toutiao.melon.master.controller.ProvideJarController;
 import com.toutiao.melon.shared.GuiceModule;
-import io.grpc.BindableService;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -41,8 +40,8 @@ public class MasterServer {
                         return next.startCall(call, headers);
                     }
                 })
-                .addService((BindableService) injector.getInstance(ManageJobController.class))
-                .addService((BindableService) injector.getInstance(ProvideJarController.class))
+                .addService(injector.getInstance(ManageJobController.class))
+                .addService(injector.getInstance(ProvideJarController.class))
                 .build()
                 .start();
 
