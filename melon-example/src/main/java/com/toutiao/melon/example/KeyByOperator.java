@@ -33,11 +33,11 @@ public class KeyByOperator implements IOperator {
     @Override
     public void defineOutGoingStream(OutGoingStream outGoingStream) {
         outGoingStream.addSchema(
-                        "oneReduce",
+                        "oneReduceStream",
                         new Field("oneWord", FieldType.STRING),
                         new Field("oneCount", FieldType.INT))
                       .addSchema(
-                       "twoReduce",
+                       "twoReduceStream",
                         new Field("twoWord", FieldType.STRING),
                         new Field("twoCount", FieldType.INT));
     }

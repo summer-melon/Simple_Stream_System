@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.toutiao.melon.api.ISource;
 import com.toutiao.melon.api.stream.Collector;
+import com.toutiao.melon.api.stream.Field;
+import com.toutiao.melon.api.stream.FieldType;
 import com.toutiao.melon.api.stream.OutGoingStream;
 import com.toutiao.melon.api.stream.Value;
 import java.time.Duration;
@@ -44,7 +46,11 @@ public class SourceOperator implements ISource {
 
     @Override
     public void defineOutGoingStream(OutGoingStream outGoingStream) {
-
+        outGoingStream.addSchema(
+                "sourceStream",
+                new Field("sourceWord", FieldType.STRING),
+                new Field("sourceCount", FieldType.INT)
+        );
     }
 
     @Override
