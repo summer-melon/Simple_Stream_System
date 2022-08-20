@@ -29,11 +29,11 @@ public class JobLoader {
     private Map<String, Node> nodes;
     private Map<String, List<Edge>> graph;
 
-    public ComputationGraph load(String topologyName, URL jarLocalUrl) throws Throwable {
+    public ComputationGraph load(String jobName, URL jarLocalUrl) throws Throwable {
         URL[] url = {jarLocalUrl};
         try (URLClassLoader loader = URLClassLoader.newInstance(url)) {
-            loadTopologyDefinition(topologyName, loader, jarLocalUrl);
-            validateTopology(topologyName, loader);
+            loadJobDefinition(jobName, loader, jarLocalUrl);
+            validateJob(jobName, loader);
             String sourceId = getSourceId(loader);
             // nodeId => TaskDefinition
             Map<String, TaskDefinition> tasks = detectCycleAndConnectivity(sourceId);
@@ -45,7 +45,7 @@ public class JobLoader {
             TaskDefinition ackerTask = new TaskDefinition();
             ackerTask.setProcessNum(1);
             ackerTask.setThreadsPerProcess(3);
-            ackerTask.setInboundStreamIds(Lists.newArrayList(topologyName + "-~ackerInbound"));
+            ackerTask.setInboundStreamIds(Lists.newArrayList(jobName + "-~ackerInbound"));
             computationGraph.getTasks().put("~acker", ackerTask);
             return computationGraph;
         }
@@ -195,28 +195,28 @@ public class JobLoader {
         return sorted;
     }
 
-    private void loadTopologyDefinition(
-            String topologyName, URLClassLoader loader, URL jarLocalUrl) throws Throwable {
+    private void loadJobDefinition(
+            String jobName, URLClassLoader loader, URL jarLocalUrl) throws Throwable {
         Class<?> mainClass;
         try (JarFile jarFile = new JarFile(jarLocalUrl.getFile())) {
             String mainClassName = jarFile.getManifest().getMainAttributes().getValue("Main-Class");
             mainClass = loader.loadClass(mainClassName);
-            Job topology = ((IJob) mainClass.getDeclaredConstructor().newInstance()).getJob();
-            nodes = topology.getNodes();
-            graph = topology.getEdges();
+            Job job = ((IJob) mainClass.getDeclaredConstructor().newInstance()).getJob();
+            nodes = job.getNodes();
+            graph = job.getEdges();
 
-            // add "topologyName-" prefix for streamId
+            // add "jobName-" prefix for streamId
             graph.values().forEach(li ->
-                    li.forEach(edge -> edge.setStreamId(topologyName + "-" + edge.getStreamId())));
+                    li.forEach(edge -> edge.setStreamId(jobName + "-" + edge.getStreamId())));
         }
     }
 
-    private void validateTopology(String topologyName, URLClassLoader loader) throws Throwable {
+    private void validateJob(String jobName, URLClassLoader loader) throws Throwable {
         for (Map.Entry<String, List<Edge>> e : graph.entrySet()) {
             String sourceId = e.getKey();
 
             Class<?> sourceClass = loader.loadClass(nodes.get(sourceId).getClassName());
-            OutGoingStream declarer = new OutGoingStream(topologyName, sourceId);
+            OutGoingStream declarer = new OutGoingStream(jobName, sourceId);
             ((IOutStream) sourceClass.getDeclaredConstructor()
                     .newInstance()).defineOutGoingStream(declarer);
             Set<String> schemaNames = declarer.getOutGoingStreamSchemas().keySet();
@@ -280,7 +280,7 @@ public class JobLoader {
             }
             String thisNode = edges.get(s.edgeIndex).getTargetId();
             if (grayNodes.containsKey(thisNode)) {
-                throw new JobException("Cycle detected in topology");
+                throw new JobException("Cycle detected in job");
             }
             if (blackNodes.containsKey(thisNode)) {
                 continue;

@@ -55,7 +55,7 @@ public class ZooKeeperService {
             zkConn.set("/master", masterAddr);
         }
 
-        zkConn.create("/master/topology", null);
+        zkConn.create("/master/job", null);
         zkConn.create("/worker", null);
         // for task assignment, persistent children
         zkConn.create("/worker/registered", null);
@@ -67,8 +67,8 @@ public class ZooKeeperService {
         zkConn.create("/exporter", null);
     }
 
-    public boolean topologyExists(String topologyName) {
-        return zkConn.exists("/master/topology/" + topologyName);
+    public boolean jobExists(String jobName) {
+        return zkConn.exists("/master/job/" + jobName);
     }
 
     private static class LoadInfo {
@@ -106,7 +106,7 @@ public class ZooKeeperService {
         }
     }
 
-    public synchronized void startTopology(String topologyName, ComputationGraph computationGraph)
+    public synchronized void startJob(String jobName, ComputationGraph computationGraph)
             throws InterruptedException, KeeperException {
         List<String> availableWorkers = zkConn.getChildren("/worker/available");
         if (availableWorkers.isEmpty()) {
@@ -144,7 +144,7 @@ public class ZooKeeperService {
             }
             int processIndex = encodeHelper.get(taskName) + 1;
             encodeHelper.put(taskName, processIndex);
-            return topologyName + "#" + taskName + "#" + processIndex + "#" + threadNum
+            return jobName + "#" + taskName + "#" + processIndex + "#" + threadNum
                     + "#" + inboundStr + "#" + outboundStr;
         };
 
@@ -204,7 +204,7 @@ public class ZooKeeperService {
                         OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             }
         }
-        txn.create("/master/topology/" + topologyName, "run".getBytes(),
+        txn.create("/master/job/" + jobName, "run".getBytes(),
                 OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         try {
             txn.commit();
@@ -214,9 +214,9 @@ public class ZooKeeperService {
 
     }
 
-    public void stopTopology(String topologyName) {
-        String topologyPath = "/master/topology/" + topologyName;
-        zkConn.set(topologyPath, "stop");
+    public void stopJob(String jobName) {
+        String jobPath = "/master/job/" + jobName;
+        zkConn.set(jobPath, "stop");
         String registeredPath = "/worker/registered";
         List<String> registeredWorkers = zkConn.getChildren(registeredPath);
 
@@ -226,8 +226,8 @@ public class ZooKeeperService {
             int threadNum = Integer.parseInt(zkConn.get(workerPath));
             List<String> assignedTasks = zkConn.getChildren(workerPath);
             for (String task : assignedTasks) {
-                if (task.startsWith(topologyName + "#")) {
-                    // [0] => topologyName
+                if (task.startsWith(jobName + "#")) {
+                    // [0] => jobName
                     // [1] => taskName
                     // [2] => processIndex
                     // [3] => threadNum
@@ -244,19 +244,19 @@ public class ZooKeeperService {
         String streamPath = "/stream";
         List<String> streams = zkConn.getChildren(streamPath);
         for (String stream : streams) {
-            if (stream.startsWith(topologyName + "-")) {
+            if (stream.startsWith(jobName + "-")) {
                 zkConn.deleteRecursive(streamPath + "/" + stream);
             }
         }
 
-        zkConn.delete(topologyPath);
+        zkConn.delete(jobPath);
     }
 
     public Map<String, String> getRunningTopologies() {
-        List<String> topologyNames = zkConn.getChildren("/master/topology");
+        List<String> jobNames = zkConn.getChildren("/master/job");
         Map<String, String> result = new HashMap<>();
-        for (String name : topologyNames) {
-            result.put(name, zkConn.get("/master/topology/" + name));
+        for (String name : jobNames) {
+            result.put(name, zkConn.get("/master/job/" + name));
         }
         return result;
     }
