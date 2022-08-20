@@ -11,7 +11,6 @@ import com.toutiao.melon.api.stream.OutGoingStream;
 import com.toutiao.melon.shared.GuiceModule;
 import com.toutiao.melon.shared.util.SharedUtil;
 import com.toutiao.melon.shared.wrapper.ZooKeeperConnection;
-import com.toutiao.melon.workerprocess.acker.Acker;
 import com.toutiao.melon.workerprocess.controller.TransmitTupleController;
 import com.toutiao.melon.workerprocess.job.OperatorLoader;
 import com.toutiao.melon.workerprocess.thread.ComputeThread;
@@ -23,6 +22,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
@@ -54,7 +55,6 @@ public class WorkerProcessServer {
     private ZooKeeperConnection zkConn;
 
 
-
     private final ExecutorService threadPool = Executors.newCachedThreadPool(r -> {
         Thread t = Executors.defaultThreadFactory().newThread(r);
         t.setDaemon(true);
@@ -64,7 +64,7 @@ public class WorkerProcessServer {
     private Server server;
 
     private int threadNum;
-    private String topologyName;
+    private String jobyName;
     private String taskName;
     private String processIndex;
     private String inbound;
@@ -74,12 +74,10 @@ public class WorkerProcessServer {
         boolean isAcker = "~acker".equals(taskName);
 
         Class<? extends IOutStream> opClass;
-        if (isAcker) {
-            opClass = Acker.class;
-        } else {
-            URL jarUrl = Paths.get(jarPath).toUri().toURL();
-            opClass = new OperatorLoader().load(jarUrl, taskName);
-        }
+
+        URL jarUrl = Paths.get(jarPath).toUri().toURL();
+        opClass = new OperatorLoader().load(jarUrl, taskName);
+
 
         // acker schema
         DynamicSchema ackerSchema = null;
@@ -116,7 +114,7 @@ public class WorkerProcessServer {
         IOutStream op = opClass.newInstance();
         for (int i = 0; i < threadNum; ++i) {
             threadPool.submit(new ComputeThread(taskFullName + i,
-                    topologyName, op, inboundSchema, outboundSchemaMap,
+                    jobyName, op, inboundSchema, outboundSchemaMap,
                     inboundQueue, outboundQueue, ackerSchema));
         }
         // TODO: add thread monitor as new thread
@@ -151,7 +149,7 @@ public class WorkerProcessServer {
             Class<? extends IOutStream> opClass, DynamicSchema ackerSchema)
             throws Throwable {
         IOutStream operator = opClass.newInstance();
-        OutGoingStream declarer = new OutGoingStream(topologyName, taskName);
+        OutGoingStream declarer = new OutGoingStream(jobyName, taskName);
         operator.defineOutGoingStream(declarer);
         Map<String, DynamicSchema> outboundSchemaMap = declarer.getOutGoingStreamSchemas();
         Transaction txn = zkConn.transaction();
@@ -164,7 +162,7 @@ public class WorkerProcessServer {
             txn.commit();
         }
 
-        String ackerStreamId = topologyName + "-~ackerInbound";
+        String ackerStreamId = jobyName + "-~ackerInbound";
         outboundSchemaMap.put(ackerStreamId, ackerSchema);
         zkConn.create("/stream/" + ackerStreamId, null);
         return outboundSchemaMap;
@@ -184,14 +182,14 @@ public class WorkerProcessServer {
     }
 
     private void decodeTaskFullName(String taskFullName) {
-        // [0] => topologyName
+        // [0] => jobyName
         // [1] => taskName
         // [2] => processIndex
         // [3] => threadNum
         // [4] => inboundStr
         // [5] => outboundStr
         String[] taskInfo = taskFullName.split("#", -1);
-        topologyName = taskInfo[0];
+        jobyName = taskInfo[0];
         taskName = taskInfo[1];
         processIndex = taskInfo[2];
         threadNum = Integer.parseInt(taskInfo[3]);

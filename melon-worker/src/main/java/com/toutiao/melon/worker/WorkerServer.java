@@ -12,6 +12,7 @@ import com.toutiao.melon.workerprocess.WorkerProcessMain;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Watcher;
@@ -54,7 +56,6 @@ public class WorkerServer {
             log.error("Cannot get host IP: " + e.toString());
             System.exit(-1);
         }
-
         registeredPath = "/worker/registered/" + ip;
         String nodeDataPath = "/worker/nodeData/" + ip;
         acceptedTasksPath = nodeDataPath + "/accepted";
@@ -65,16 +66,13 @@ public class WorkerServer {
             log.error("A worker is already running on this node");
             System.exit(-1);
         }
-
         initGrpcClient(zkConn.get("/master"));
-
         zkConn.addWatch(registeredPath, e -> {
             if (e.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
                 handleAssignmentChange();
             }
         });
         handleAssignmentChange();
-
         // monitor accepted tasks and restart them if necessary
         new Thread(() -> {
             while (true) {
@@ -99,8 +97,6 @@ public class WorkerServer {
                 }
             }
         }).start();
-
-        // block
         LockSupport.park();
     }
 
@@ -137,28 +133,16 @@ public class WorkerServer {
     }
 
     private long createTaskProcess(String taskFullName) {
-        // [0] => topologyName
-        // [1] => taskName
-        // [2] => processIndex
-        // [3] => threadNum
-        // [4] => inboundStr
-        // [5] => outboundStr
         String[] taskInfo = taskFullName.split("#", -1);
-        String topologyName = taskInfo[0];
+        String jobName = taskInfo[0];
         String taskName = taskInfo[1];
-
         String jarPath = null;
-        if ("~acker".equals(taskName)) {
-            jarPath = "~acker";
-        } else {
-            try {
-                jarPath = getJarPath(topologyName);
-            } catch (Throwable t) {
-                log.error("Failed to get jar: " + t.toString());
-                System.exit(-1);
-            }
+        try {
+            jarPath = getJarPath(jobName);
+        } catch (Throwable t) {
+            log.error("Failed to get jar: " + t.toString());
+            System.exit(-1);
         }
-
         String classPath = System.getProperty("java.class.path");
         ProcessBuilder pb = new ProcessBuilder(WorkerUtil.getJvmPath(), "-cp",
                 classPath, WorkerProcessMain.class.getCanonicalName(), jarPath, taskFullName);
@@ -192,11 +176,11 @@ public class WorkerServer {
         }
     }
 
-    private String getJarPath(String topologyName) throws InterruptedException {
-        while (!jarService.isJarFileExists(topologyName)) {
+    private String getJarPath(String jobName) throws InterruptedException {
+        while (!jarService.isJarFileExists(jobName)) {
             OutputStream out;
             try {
-                out = jarService.getOutputStream(topologyName);
+                out = jarService.getOutputStream(jobName);
             } catch (IOException e) {
                 log.error("Fail to write jar file: " + e.toString());
                 continue;
@@ -210,7 +194,7 @@ public class WorkerServer {
             };
 
             ProvideJarRequest request = ProvideJarRequest.newBuilder()
-                    .setJobName(topologyName)
+                    .setJobName(jobName)
                     .build();
 
             CountDownLatch receiveCompleted = new CountDownLatch(1);
@@ -234,7 +218,7 @@ public class WorkerServer {
                     log.error("Fail to write jar file: " + t.toString());
                     closeOutputStream.run();
                     try {
-                        jarService.deleteJarFile(topologyName);
+                        jarService.deleteJarFile(jobName);
                     } catch (Throwable th) {
                         log.error("Fail to delete jarFile when cleaning up: " + th.toString());
                     }
@@ -251,6 +235,6 @@ public class WorkerServer {
 
             receiveCompleted.await();
         }
-        return jarService.getJarFilePath(topologyName).toString();
+        return jarService.getJarFilePath(jobName).toString();
     }
 }
