@@ -4,8 +4,11 @@ import com.toutiao.melon.api.IOperator;
 import com.toutiao.melon.api.stream.Collector;
 import com.toutiao.melon.api.stream.Event;
 import com.toutiao.melon.api.stream.OutGoingStream;
+
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.Timer;
@@ -23,12 +26,12 @@ public class TwoReduceOperator implements IOperator {
             @Override
             public void run() {
                 if (!wordCountMap.isEmpty()) {
+                    long now = System.currentTimeMillis();
                     for (Map.Entry<String, Integer> wordCount : wordCountMap.entrySet()) {
                         String wordKey = wordCount.getKey();
                         int wordValue = wordCount.getValue();
-                        System.out.println("two: " + LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(System.currentTimeMillis()),
-                                TimeZone.getDefault().toZoneId())
+                        System.out.println("two: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                                .format(new Date(now))
                                 + " " + wordKey + "," + wordValue);
                     }
                     wordCountMap.clear();
