@@ -2,11 +2,13 @@ package com.toutiao.melon.mock.faker;
 
 import com.toutiao.melon.mock.data.MockData;
 import com.toutiao.melon.mock.entity.Event;
-
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatelessBigFaker {
 
+    private static final Logger log = LoggerFactory.getLogger(StatelessBigFaker.class);
     /** 使用单词数量 */
     private int maxWords;
     /** 最大可能次数 */
@@ -42,6 +44,7 @@ public class StatelessBigFaker {
     }
 
     public Event mock() {
+        log.info("word size: {}", mockData.size());
         int wordIdx = StatelessBigFaker.rand(maxWords);
         String updateWord = StatelessBigFaker.generateNewWord(mockData.get(wordIdx));
         int wordCount = StatelessBigFaker.rand(maxCount) + 1;
