@@ -4,7 +4,7 @@ import java.util.Properties;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 public class Config {
-    public static final String BOOTSTRAP_SERVERS = "hadoop101:9092,hadoop102:9092";
+    public static final String BOOTSTRAP_SERVERS = "node1:9092,node2:9092";
     public static final String PROTOCOL = "PLAINTEXT";
     public static final String TOPIC = "bytedance-youth-training-camp";
     public static final Properties KAFKA_PROPS = new Properties();
